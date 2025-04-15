@@ -18,12 +18,8 @@ const restaurantSchema = new mongoose.Schema(
         trim: true,
       },
       coordinates: {
-        latitude: {
-          type: Number,
-        },
-        longitude: {
-          type: Number,
-        },
+        latitude: Number,
+        longitude: Number,
       },
     },
     cuisine: {
@@ -35,6 +31,10 @@ const restaurantSchema = new mongoose.Schema(
       enum: ['$', '$$', '$$$', '$$$$'],
       default: '$$',
     },
+    visited: {
+      type: Boolean,
+      default: false,
+    },
     website: {
       type: String,
       trim: true,
@@ -43,15 +43,11 @@ const restaurantSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   { timestamps: true }
 );
 
-// Index for faster queries by trip
+// Index for optimized lookups by trip
 restaurantSchema.index({ tripId: 1 });
 
 const Restaurant = mongoose.model('Restaurant', restaurantSchema);

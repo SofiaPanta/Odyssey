@@ -20,16 +20,11 @@ const packingItemSchema = new mongoose.Schema(
     isPacked: {
       type: Boolean,
       default: false,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+    }
   },
   { timestamps: true }
 );
 
-// Index for faster queries by trip
 packingItemSchema.index({ tripId: 1 });
 
 const PackingItem = mongoose.model('PackingItem', packingItemSchema);

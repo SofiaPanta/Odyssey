@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     email: { 
       type: String, 
       required: true, 
-      unique: true,
+      unique: true,  // This already creates an index
       trim: true,
       lowercase: true
     },
@@ -52,9 +52,6 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
     throw new Error('Password comparison failed');
   }
 };
-
-// Index for faster queries by email
-userSchema.index({ email: 1 });
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;

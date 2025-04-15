@@ -1,0 +1,181 @@
+.budget-container {
+  max-width: var(--container-max-width, 1200px);
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  color: var(--color-primary-dark, #051438);
+  margin-bottom: 1.5rem;
+}
+
+/* Budget Summary */
+.budget-summary {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.budget-bar {
+  height: 24px;
+  background-color: var(--color-gray-200, #eee);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.budget-fill {
+  height: 100%;
+  background-color: var(--color-primary, #2D5A9D);
+  border-radius: 12px;
+  transition: width 0.3s ease;
+}
+
+.budget-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: var(--color-gray-500, #333);
+}
+
+/* Budget Form */
+.budget-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 1rem;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+.budget-form input,
+.budget-form select {
+  padding: 0.75rem;
+  border: 1px solid var(--color-gray-300, #ddd);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.budget-form input:focus,
+.budget-form select:focus {
+  outline: none;
+  border-color: var(--color-primary, #2D5A9D);
+  box-shadow: 0 0 0 2px rgba(45, 90, 157, 0.1);
+}
+
+.budget-form button {
+  background-color: var(--color-primary, #2D5A9D);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  height: 100%;
+}
+
+.budget-form button:hover {
+  background-color: var(--color-primary-dark, #051438);
+}
+
+/* Expenses List */
+.expenses-list {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-gray-200, #eee);
+  transition: background-color 0.2s;
+}
+
+.expense-item:hover {
+  background-color: var(--color-light, #f5f7fa);
+}
+
+.expense-item:last-child {
+  border-bottom: none;
+}
+
+.expense-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.expense-info strong {
+  font-size: 1rem;
+  color: var(--color-gray-700, #333);
+}
+
+.expense-info div {
+  font-size: 0.875rem;
+  color: var(--color-gray-500, #666);
+}
+
+.expense-amount {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 600;
+  color: var(--color-primary-dark, #051438);
+}
+
+.expense-amount button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.125rem;
+  color: var(--color-gray-400, #999);
+  transition: color 0.2s;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expense-amount button:hover {
+  color: var(--color-error, #f44336);
+}
+
+/* Empty state */
+.expenses-list:empty::after {
+  content: "No expenses added yet";
+  display: block;
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-gray-400, #999);
+  font-style: italic;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .budget-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .expense-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .expense-amount {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+  }
+}

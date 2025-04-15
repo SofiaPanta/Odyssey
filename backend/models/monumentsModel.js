@@ -11,53 +11,33 @@ const monumentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  location: {
-    address: {
-      type: String,
-      trim: true
-    },
-    coordinates: {
-      latitude: {
-        type: Number
-      },
-      longitude: {
-        type: Number
-      }
-    }
+  address: {
+    type: String,
+    trim: true
   },
   description: {
     type: String,
     trim: true
   },
+  category: {
+    type: String,
+    trim: true
+  },
+  visitTime: {
+    type: String,
+    trim: true
+  },
   entryFee: {
-    amount: {
-      type: Number,
-      default: 0
-    },
-    currency: {
-      type: String,
-      default: 'USD'
-    }
-  },
-  openingHours: {
     type: String,
     trim: true
   },
-  website: {
-    type: String,
-    trim: true
-  },
-  notes: {
-    type: String,
-    trim: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  visited: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 
-// Index for faster queries by trip
+// Index for fast lookups
 monumentSchema.index({ tripId: 1 });
 
 const Monument = mongoose.model('Monument', monumentSchema);

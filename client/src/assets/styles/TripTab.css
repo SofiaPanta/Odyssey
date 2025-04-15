@@ -1,0 +1,50 @@
+.trip-tab-container {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--color-gray-200);
+  padding-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.trip-tab {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-gray-500);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.trip-tab:hover {
+  color: var(--color-primary);
+}
+
+.trip-tab.active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .trip-tab-container {
+    flex-direction: row;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    scrollbar-width: thin;
+  }
+  
+  .trip-tab-container::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .trip-tab-container::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-300);
+    border-radius: 10px;
+  }
+}
