@@ -5,12 +5,12 @@ const Trip = require('../models/tripModel');
 const addBudgetEntry = async (req, res) => {
   try {
     const { name, category, amount } = req.body;
-    const { tripId } = req.params;
+    const { tripId } = req.query;
 
     const trip = await Trip.findById(tripId);
     if (!trip) return res.status(404).json({ message: 'Trip not found' });
     if (trip.userId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'Not authorized' });
+      return res.status(403).json({ message: 'Unauthorized' });
     }
 
     const entry = await Budget.create({ tripId, name, category, amount });
@@ -25,14 +25,19 @@ const addBudgetEntry = async (req, res) => {
 const getBudgetEntries = async (req, res) => {
   try {
     const { tripId } = req.params;
+    console.log('karol');
 
     const trip = await Trip.findById(tripId);
+    console.log(trip);
+
     if (!trip) return res.status(404).json({ message: 'Trip not found' });
     if (trip.userId.toString() !== req.user._id.toString()) {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
     const entries = await Budget.find({ tripId }).sort('-createdAt');
+    console.log('asdasdas');
+
     res.json(entries);
   } catch (err) {
     console.error('Get budget entries error:', err);
@@ -52,7 +57,7 @@ const updateBudgetEntry = async (req, res) => {
     }
 
     const fields = ['name', 'category', 'amount'];
-    fields.forEach(field => {
+    fields.forEach((field) => {
       if (req.body[field] !== undefined) {
         entry[field] = req.body[field];
       }
@@ -89,5 +94,5 @@ module.exports = {
   addBudgetEntry,
   getBudgetEntries,
   updateBudgetEntry,
-  deleteBudgetEntry
+  deleteBudgetEntry,
 };

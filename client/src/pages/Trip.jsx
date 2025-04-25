@@ -10,6 +10,10 @@ const Trip = () => {
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [budgets, setBudgets] = useState([]);
+  const [weather, setWeather] = useState(null);
+  const [documents, setDocuments] = useState([]); // ✅ ADDED
+
   const [formData, setFormData] = useState({
     tripName: '',
     startDate: '',
@@ -26,21 +30,36 @@ const Trip = () => {
         }
 
         const token = localStorage.getItem('token');
-        const response = await axios.get(`/api/trips/${tripId}`, {
+        const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        };
+
+        const tripResponse = await axios.get(`/api/trips/${tripId}`, config);
+        const tripData = tripResponse.data;
+
+        setTrip(tripData);
+        setFormData({
+          tripName: tripData.tripName || '',
+          startDate: tripData.arrivalDate?.split('T')[0] || '',
+          endDate: tripData.departureDate?.split('T')[0] || '',
         });
 
-        const data = response.data;
-        setTrip(data);
-        setFormData({
-          tripName: data.tripName || '',
-          startDate: data.arrivalDate?.split('T')[0] || '',
-          endDate: data.departureDate?.split('T')[0] || '',
-        });
+        console.log(tripData);
+        setDocuments(tripData.documents || []);
+
+        const budgetResponse = await axios.get(
+          `/api/budgets/trips/${tripId}`,
+          config
+        );
+        setBudgets(budgetResponse.data);
+
+        if (tripData.tripName) {
+          fetchWeather(tripData.tripName);
+        }
       } catch (error) {
-        console.error('Error fetching trip:', error);
+        console.error('Error fetching trip or budgets:', error);
         setError('Failed to load trip details. Please try again.');
       } finally {
         setLoading(false);
@@ -49,6 +68,53 @@ const Trip = () => {
 
     fetchTrip();
   }, [tripId]);
+
+  const fetchWeather = async (destination) => {
+    try {
+      const geoRes = await axios.get(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          destination
+        )}`
+      );
+      const location = geoRes.data.results?.[0];
+      if (!location) return;
+
+      const weatherRes = await axios.get(
+        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&daily=temperature_2m_max,temperature_2m_min&timezone=auto`
+      );
+
+      setWeather(weatherRes.data.daily);
+    } catch (err) {
+      console.error('Error fetching weather:', err);
+    }
+  };
+
+  const handleUploadDocument = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('document', file); // Field name must match 'document'
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `/api/trips/${tripId}/upload`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle successful upload
+    } catch (error) {
+      console.error('Upload failed:', error);
+      // Handle error
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,7 +141,6 @@ const Trip = () => {
           },
           { headers }
         );
-
         navigate(`/trips/${response.data._id}`);
       } else {
         await axios.put(
@@ -110,6 +175,8 @@ const Trip = () => {
     }
   };
 
+  const spent = budgets.reduce((sum, entry) => sum + entry.amount, 0);
+
   if (loading) return <div className="loading">Loading...</div>;
 
   return (
@@ -120,16 +187,21 @@ const Trip = () => {
         <h1>{tripId === 'new' ? 'Create New Trip' : formData.tripName}</h1>
         {tripId !== 'new' && (
           <div className="trip-dates">
-            {formData.startDate && formData.endDate &&
-              `${new Date(formData.startDate).toLocaleDateString()} - ${new Date(formData.endDate).toLocaleDateString()}`}
+            {formData.startDate &&
+              formData.endDate &&
+              `${new Date(
+                formData.startDate
+              ).toLocaleDateString()} - ${new Date(
+                formData.endDate
+              ).toLocaleDateString()}`}
           </div>
         )}
       </div>
 
-      {/* Show TripTab and Overview only after trip is created */}
       {tripId !== 'new' && <TripTab />}
 
       <div className="trip-content">
+        {/* Form */}
         <form onSubmit={handleSubmit} className="trip-form">
           <div className="form-group">
             <label htmlFor="tripName">Trip Name</label>
@@ -173,7 +245,6 @@ const Trip = () => {
             <button type="submit" className="primary-btn">
               {tripId === 'new' ? 'Create Trip' : 'Save Changes'}
             </button>
-
             {tripId !== 'new' && (
               <button
                 type="button"
@@ -196,49 +267,72 @@ const Trip = () => {
                 <span>
                   {formData.startDate && formData.endDate
                     ? `${Math.ceil(
-                        (new Date(formData.endDate) - new Date(formData.startDate)) /
-                        (1000 * 60 * 60 * 24)
+                        (new Date(formData.endDate) -
+                          new Date(formData.startDate)) /
+                          (1000 * 60 * 60 * 24)
                       )} days`
                     : 'N/A'}
                 </span>
               </p>
               <p>
                 <strong>Total Budget</strong>
-                <span>€3,500</span>
+                <span>€{trip?.totalBudget?.toLocaleString() || 0}</span>
               </p>
               <p>
                 <strong>Spent</strong>
-                <span>€1,200</span>
+                <span>€{spent.toLocaleString()}</span>
               </p>
             </div>
 
             {/* Weather Forecast */}
-            <div className="overview-card">
-              <h3>Weather Forecast</h3>
-              <div className="weather-row">
-                <span>March 15</span>
-                <span>☀️ 18°C</span>
+            {weather && (
+              <div className="overview-card">
+                <h3>Weather Forecast</h3>
+                {weather.time.map((day, index) => (
+                  <div className="weather-row" key={day}>
+                    <span>{new Date(day).toLocaleDateString()}</span>
+                    <span>
+                      🌡 {weather.temperature_2m_min[index]}°C -{' '}
+                      {weather.temperature_2m_max[index]}°C
+                    </span>
+                  </div>
+                ))}
               </div>
-              <div className="weather-row">
-                <span>March 16</span>
-                <span>❄️ 20°C</span>
-              </div>
-            </div>
+            )}
 
             {/* Travel Documents */}
             <div className="overview-card">
               <div className="card-header">
                 <h3>Travel Documents</h3>
-                <a href="#" className="upload-link">Upload New</a>
+                <label htmlFor="upload-pdf" className="upload-link">
+                  Upload New
+                </label>
+                <input
+                  type="file"
+                  id="upload-pdf"
+                  accept="application/pdf"
+                  onChange={handleUploadDocument}
+                  style={{ display: 'none' }}
+                />
               </div>
               <ul className="documents-list">
-                <li>
-                  <span className="dot" /> Flight Tickets <a href="#">View</a>
-                </li>
-                <li>
-                  <span className="dot" /> Hotel Reservation <a href="#">View</a>
-                </li>
-              </ul>
+  {documents.length === 0 ? (
+    <li>No documents uploaded yet.</li>
+  ) : (
+    documents.map((doc, idx) => (
+      <li key={idx}>
+        <span className="dot" />
+        <a
+          href={`http://localhost:2000/uploads/documents/${doc}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {doc}
+        </a>
+      </li>
+    ))
+  )}
+</ul>
             </div>
           </div>
         )}

@@ -12,27 +12,40 @@ const Budget = () => {
   const [budgetGoal, setBudgetGoal] = useState(0);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
+  const [trip, setTrip] = useState(null);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiSuggestions, setAiSuggestions] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   useEffect(() => {
-    const fetchExpenses = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`/api/trips/${tripId}/budget`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const headers = { Authorization: `Bearer ${token}` };
+
+        const tripRes = await axios.get(`/api/trips/${tripId}`, { headers });
+        setTrip(tripRes.data);
+        setBudgetGoal(tripRes.data.totalBudget || 0);
+
+        const budgetRes = await axios.get(`/api/budgets/trips/${tripId}`, {
+          headers,
         });
-        setExpenses(res.data);
+
+        setExpenses(budgetRes.data);
       } catch (err) {
-        console.error('Error fetching expenses', err);
-        setError('Failed to load expenses');
+        console.error('Error fetching budget or trip data:', err);
+        setError('Failed to load trip budget or expenses');
       }
     };
 
-    fetchExpenses();
+    fetchData();
   }, [tripId]);
 
   const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const remaining = budgetGoal - totalSpent;
-  const percentSpent = budgetGoal > 0 ? Math.min((totalSpent / budgetGoal) * 100, 100) : 0;
+  const percentSpent =
+    budgetGoal > 0 ? Math.min((totalSpent / budgetGoal) * 100, 100) : 0;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,19 +56,25 @@ const Budget = () => {
     if (!form.name || !form.category || !form.amount) return;
 
     const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
     const expenseData = { ...form, amount: Number(form.amount) };
 
     try {
       if (editingId) {
-        const res = await axios.put(`/api/budget/${editingId}`, expenseData, {
-          headers: { Authorization: `Bearer ${token}` }
+        const res = await axios.put(`/api/budgets/${editingId}`, expenseData, {
+          headers,
         });
-        setExpenses(expenses.map(exp => (exp._id === editingId ? res.data : exp)));
+        setExpenses(
+          expenses.map((exp) => (exp._id === editingId ? res.data : exp))
+        );
         setEditingId(null);
       } else {
-        const res = await axios.post(`/api/trips/${tripId}/budget`, expenseData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.post(
+          `/api/budgets?tripId=${tripId}`,
+          expenseData,
+          { headers }
+        );
+
         setExpenses([...expenses, res.data]);
       }
 
@@ -69,10 +88,10 @@ const Budget = () => {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`/api/budget/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      await axios.delete(`/api/budgets/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setExpenses(expenses.filter(e => e._id !== id));
+      setExpenses(expenses.filter((e) => e._id !== id));
       if (id === editingId) {
         setEditingId(null);
         setForm({ name: '', category: '', amount: '' });
@@ -87,39 +106,63 @@ const Budget = () => {
     setForm({
       name: exp.name,
       category: exp.category,
-      amount: exp.amount
+      amount: exp.amount,
     });
     setEditingId(exp._id);
   };
 
-  const handleBudgetGoalChange = (e) => {
-    const value = Number(e.target.value);
-    if (!isNaN(value) && value >= 0) {
-      setBudgetGoal(value);
+  const handleAISuggestions = async () => {
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+    setAiSuggestions('');
+    setAiError('');
+
+    try {
+      const res = await fetch('/api/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: aiPrompt }),
+      });
+      const data = await res.json();
+
+      if (data.result) {
+        setAiSuggestions(data.result);
+      } else {
+        throw new Error('No suggestions returned.');
+      }
+    } catch (err) {
+      setAiError(err.message);
+    } finally {
+      setAiLoading(false);
     }
   };
 
   return (
     <div className="budget-container">
-       <TripHeader />
+      <TripHeader />
       <TripTab />
 
       <h1 className="section-title">Budget</h1>
 
       <div className="budget-summary">
         <div className="budget-bar">
-          <div className="budget-fill" style={{ width: `${percentSpent}%` }}></div>
+          <div
+            className="budget-fill"
+            style={{ width: `${percentSpent}%` }}
+          ></div>
         </div>
         <div className="budget-labels">
           <span>€{totalSpent} spent</span>
-          <span>€{remaining} remaining of €{budgetGoal}</span>
+          <span>
+            €{remaining} remaining of €{budgetGoal}
+          </span>
         </div>
         <div className="budget-goal-input">
           <label>Set Total Budget: </label>
           <input
             type="number"
             value={budgetGoal}
-            onChange={handleBudgetGoalChange}
+            onChange={(e) => setBudgetGoal(Number(e.target.value))}
             min="0"
           />
         </div>
@@ -168,6 +211,21 @@ const Budget = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="ai-suggestions-section">
+        <h3>AI Budget Suggestions</h3>
+        <input
+          type="text"
+          value={aiPrompt}
+          onChange={(e) => setAiPrompt(e.target.value)}
+          placeholder="Suggest budget plan for 5 days in Rome..."
+        />
+        <button onClick={handleAISuggestions}>
+          {aiLoading ? 'Loading...' : 'Get Suggestions'}
+        </button>
+        {aiError && <div className="error-message">{aiError}</div>}
+        {aiSuggestions && <pre>{aiSuggestions}</pre>}
       </div>
     </div>
   );

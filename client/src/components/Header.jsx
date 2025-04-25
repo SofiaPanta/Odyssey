@@ -8,10 +8,10 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
   const handleLogout = () => {
     // Clear token from localStorage
     localStorage.removeItem('token');
-    
+
     // Update authentication state
     setIsAuthenticated(false);
-    
+
     // Redirect to home
     navigate('/');
   };
@@ -24,20 +24,13 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
             <h1>Odyssey</h1>
           </Link>
         </div>
-        
+
         <nav className="nav">
           {isAuthenticated ? (
             // Links for authenticated users
             <ul className="nav-links">
               <li>
-                <Link to="/dashboard">Dashboard</Link>
-              </li>
-              <li className="dropdown">
-                <span>My Trips</span>
-                <div className="dropdown-content">
-                  <Link to="/trips">All Trips</Link>
-                  <Link to="/trips/new">New Trip</Link>
-                </div>
+                <Link to="/dashboard">My Trips</Link>
               </li>
               <li>
                 <button onClick={handleLogout} className="logout-btn">
@@ -45,9 +38,9 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
                 </button>
               </li>
               <li className="user-profile">
-                <img 
-                  src="/user-avatar.svg" 
-                  alt="User Profile" 
+                <img
+                  src="/user-avatar.svg"
+                  alt="User Profile"
                   className="avatar"
                 />
               </li>
@@ -56,10 +49,14 @@ const Header = ({ isAuthenticated, setIsAuthenticated }) => {
             // Links for non-authenticated users
             <ul className="nav-links">
               <li>
-                <Link to="/login" className="login-btn">Login</Link>
+                <Link to="/login" className="login-btn">
+                  Login
+                </Link>
               </li>
               <li>
-                <Link to="/register" className="register-btn">Sign Up</Link>
+                <Link to="/register" className="register-btn">
+                  Sign Up
+                </Link>
               </li>
             </ul>
           )}

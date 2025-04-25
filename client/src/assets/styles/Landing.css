@@ -1,7 +1,5 @@
 .landing-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  padding-top: var(--header-height);
 }
 
 /* Hero Section */
@@ -9,15 +7,15 @@
   background-color: var(--color-primary-dark);
   color: var(--color-white);
   padding: var(--spacing-3xl) 0;
-  position: relative;
   text-align: center;
+  width: 100vw; 
+  margin-left: calc(-50vw + 50%);
 }
 
 .hero-content {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-  z-index: 2;
+  padding: 0; 
 }
 
 .hero-content h1 {
@@ -82,7 +80,6 @@
 /* Features Section */
 .features {
   padding: var(--spacing-3xl) var(--spacing-lg);
-  background-color: var(--color-white);
 }
 
 .features h2 {

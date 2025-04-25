@@ -211,29 +211,43 @@ const PackingList = () => {
         <div key={category}>
           <h3>{category}</h3>
           <ul>
-            {packingItems.filter(i => i.category === category).map(item => (
-              <li key={item._id}>
-                {editingItem === item._id ? (
-                  <>
-                    <input name="name" value={editFormData.name} onChange={e => setEditFormData(prev => ({ ...prev, name: e.target.value }))} />
-                    <input name="category" value={editFormData.category} onChange={e => setEditFormData(prev => ({ ...prev, category: e.target.value }))} />
-                    <button onClick={() => handleSaveEdit(item._id)}>Save</button>
-                    <button onClick={() => setEditingItem(null)}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="checkbox"
-                      checked={item.isPacked}
-                      onChange={() => handleToggleItem(item._id, item.isPacked)}
-                    />
-                    {item.name}
-                    <button onClick={() => handleEditClick(item)}>✏️</button>
-                    <button onClick={() => handleDeleteItem(item._id)}>🗑️</button>
-                  </>
-                )}
-              </li>
-            ))}
+          {packingItems.filter(i => i.category === category).map(item => (
+  <li key={item._id}>
+    {editingItem === item._id ? (
+      <>
+        <input
+          name="name"
+          value={editFormData.name}
+          onChange={e => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+        />
+        <input
+          name="category"
+          value={editFormData.category}
+          onChange={e => setEditFormData(prev => ({ ...prev, category: e.target.value }))}
+        />
+        <div className="edit-buttons">
+          <button className="save-btn" onClick={() => handleSaveEdit(item._id)}>Save</button>
+          <button className="cancel-btn" onClick={() => setEditingItem(null)}>Cancel</button>
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="item-check">
+          <input
+            type="checkbox"
+            checked={item.isPacked}
+            onChange={() => handleToggleItem(item._id, item.isPacked)}
+          />
+          <label>{item.name}</label>
+        </div>
+        <div className="item-actions">
+          <button className="edit-btn" onClick={() => handleEditClick(item)}>✏️</button>
+          <button className="delete-btn" onClick={() => handleDeleteItem(item._id)}>🗑️</button>
+        </div>
+      </>
+    )}
+  </li>
+))}
           </ul>
         </div>
       ))}

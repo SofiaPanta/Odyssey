@@ -62,42 +62,6 @@ const Landing = () => {
           </div>
         </div>
       </section>
-
-      {/* Footer Links */}
-      <section className="footer-links">
-        <div className="link-group">
-          <h4>Odyssey</h4>
-          <ul>
-            <li><a href="#about">About Us</a></li>
-            <li><a href="#careers">Careers</a></li>
-            <li><a href="#mobile">Mobile App</a></li>
-          </ul>
-        </div>
-        <div className="link-group">
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="#terms">Terms</a></li>
-            <li><a href="#privacy">Privacy</a></li>
-            <li><a href="#cookies">Cookies</a></li>
-          </ul>
-        </div>
-        <div className="link-group">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="#help">Help Center</a></li>
-            <li><a href="#faq">FAQs</a></li>
-            <li><a href="#contact">Contact Us</a></li>
-          </ul>
-        </div>
-        <div className="link-group">
-          <h4>Newsletter</h4>
-          <p>Subscribe to get travel tips and exclusive offers</p>
-          <form className="newsletter-form">
-            <input type="email" placeholder="Your email" />
-            <button type="submit">Subscribe</button>
-          </form>
-        </div>
-      </section>
     </div>
   );
 };

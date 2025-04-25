@@ -7,17 +7,15 @@ const {
 } = require('../controllers/budgetController');
 const auth = require('../middleware/auth');
 
-const router = express.Router({ mergeParams: true }); 
+const router = express.Router({ mergeParams: true });
 
-router
-  .route('/')
-  .get(auth, getBudgetEntries)
-  .post(auth, addBudgetEntry);
+router.route('/').get(auth, getBudgetEntries).post(auth, addBudgetEntry);
 
 router
   .route('/:id')
   .put(auth, updateBudgetEntry)
   .delete(auth, deleteBudgetEntry);
 
-module.exports = router;
+router.get('/trips/:tripId', auth, getBudgetEntries);
 
+module.exports = router;
